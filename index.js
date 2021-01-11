@@ -35,18 +35,27 @@ async function get(url, params, token, method = "GET") {
 function setupProvisioning(profileContent, profileUUID) {
   const profileName = `${profileUUID}.mobileprovision`;
   shell.exec(`mkdir -p ~/Library/MobileDevice/Provisioning\\ Profiles`);
+  console.log('1')
   shell.exec(`(echo ${profileContent} | base64 --decode) > ~/Library/MobileDevice/Provisioning\\ Profiles/${profileName}`);
+  console.log('2')
 }
 
 function setupKeychain(keychainName, keychainPassword, base64P12File, p12Password) {
   const tempCertificateName = `tmp.p12`;
   shell.exec(`(echo ${base64P12File} | base64 --decode) > ${tempCertificateName}`);
+  console.log('3')
   shell.exec(`security create-keychain -p ${keychainPassword} ${keychainName}`);
+  console.log('4')
   shell.exec(`security list-keychains -d user -s login.keychain ${keychainName}`);
+  console.log('5')
   shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -T /usr/bin/codesign -T /usr/bin/security`);
+  console.log('6')
   shell.exec(`security set-keychain-settings -lut 1000 ${keychainName}`);
+  console.log('7')
   shell.exec(`security unlock-keychain -p ${keychainPassword} ${keychainName}`);
+  console.log('8')
   shell.exec(`security set-key-partition-list -S apple-tool:,apple: -s -k ${keychainPassword} ${keychainName}`);
+  console.log('9')
   shell.exec(`rm ${tempCertificateName}`);
 }
 
@@ -70,9 +79,12 @@ async function run() {
     if (bundleId) {
       const profileIds = await get(`https://api.appstoreconnect.apple.com/v1/bundleIds/${bundleId.id}/relationships/profiles`, { }, token);  
       const rawProfileIds = profileIds.data.map(profile => profile.id);
-
+      console.log(profileIds);
+      console.log(rawProfileIds);
       if (rawProfileIds) {
         const profilesResponse = await get("https://api.appstoreconnect.apple.com/v1/profiles", { "filter[id]": `${rawProfileIds}`, "filter[profileType]": signType }, token); // ProfilesResponse Type
+        console.log(profilesResponse);
+        console.log(profilesResponse.data);
         const profile = profilesResponse.data[0];
 
         if (profile) {
@@ -83,17 +95,18 @@ async function run() {
           
           setupKeychain(keychainName, keychainPassword, base64P12File, p12Password);
         } else {
-          throw `Could not find matching provisioning profile for ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/`;  
+          throw `1 Could not find matching provisioning profile for ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/`;  
         }
       } else {
-        throw `Could not find provisioning profiles for ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/resources/profiles/list`;
+        throw `2 Could not find provisioning profiles for ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/resources/profiles/list`;
       }
     } else {
-      throw `Could not find bundleIdentifier ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/resources/identifiers/list`;
+      throw `3 Could not find bundleIdentifier ${bundleIdentifier} on Developer Portal. Please check it on https://developer.apple.com/account/resources/identifiers/list`;
     }
   
   } catch (error) {
-    core.setFailed(error.message);
+    console.log("error: " + error);
+    core.setFailed(error);
   }
 } 
 
