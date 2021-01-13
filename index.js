@@ -50,7 +50,7 @@ function setupKeychain(keychainName, keychainPassword, base64P12File, p12Passwor
   console.log('5')
   shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -T /usr/bin/codesign -T /usr/bin/security`);
   console.log('6')
-  shell.exec(`security set-keychain-settings -lut 1000 ${keychainName}`);
+  shell.exec(`security set-keychain-settings -lut 21600 ${keychainName}`);
   console.log('7')
   shell.exec(`security unlock-keychain -p ${keychainPassword} ${keychainName}`);
   console.log('8')
