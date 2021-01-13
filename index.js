@@ -46,7 +46,7 @@ function setupKeychain(keychainName, keychainPassword, base64P12File, p12Passwor
   shell.exec(`security create-keychain -p ${keychainPassword} ${keychainName}`);
   shell.exec(`security set-keychain-settings -lut 21600 ${keychainName}`);
   shell.exec(`security unlock-keychain -p ${keychainPassword} ${keychainName}`);
-  shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -T /usr/bin/codesign -T /usr/bin/security`);
+  shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -A -T /usr/bin/codesign -T /usr/bin/security`);
   shell.exec(`security list-keychains -d user -s ${keychainName}`);
   shell.exec(`security set-key-partition-list -S apple-tool:,apple: -s -k ${keychainPassword} ${keychainName}`);
   shell.exec(`rm ${tempCertificateName}`);
