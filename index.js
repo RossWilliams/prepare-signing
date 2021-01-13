@@ -43,19 +43,12 @@ function setupProvisioning(profileContent, profileUUID) {
 function setupKeychain(keychainName, keychainPassword, base64P12File, p12Password) {
   const tempCertificateName = `tmp.p12`;
   shell.exec(`(echo ${base64P12File} | base64 --decode) > ${tempCertificateName}`);
-  console.log('3')
   shell.exec(`security create-keychain -p ${keychainPassword} ${keychainName}`);
-  console.log('4')
-  shell.exec(`security list-keychains -d user -s login.keychain ${keychainName}`);
-  console.log('5')
-  shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -T /usr/bin/codesign -T /usr/bin/security`);
-  console.log('6')
   shell.exec(`security set-keychain-settings -lut 21600 ${keychainName}`);
-  console.log('7')
   shell.exec(`security unlock-keychain -p ${keychainPassword} ${keychainName}`);
-  console.log('8')
+  shell.exec(`security import ${tempCertificateName} -k ${keychainName} -P ${p12Password} -T /usr/bin/codesign -T /usr/bin/security`);
+  shell.exec(`security list-keychains -d user -s ${keychainName}`);
   shell.exec(`security set-key-partition-list -S apple-tool:,apple: -s -k ${keychainPassword} ${keychainName}`);
-  console.log('9')
   shell.exec(`rm ${tempCertificateName}`);
 }
 
